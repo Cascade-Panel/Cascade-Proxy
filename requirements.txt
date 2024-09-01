@@ -1,0 +1,5 @@
+sanic
+sqlalchemy
+crossplane
+certbot
+sanic-openapi
