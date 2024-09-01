@@ -2,7 +2,7 @@ from sanic import Sanic
 from sanic.response import json
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from sanic_openapi import openapi
+from sanic_ext import Extend, openapi
 from config import DATABASE_URL, DEFAULT_API_KEY
 from routes.proxy_blueprint import proxy_blueprint
 from routes.api_key_blueprint import api_key_blueprint
@@ -10,8 +10,7 @@ from utils.error_handler import setup_error_handlers
 from models.api_key import ApiKey
 
 app = Sanic("NginxProxyAPI")
-openapi.blueprint.url_prefix = "/api/docs"
-app.blueprint(openapi.blueprint)
+Extend(app)
 
 # Database setup
 engine = create_engine(DATABASE_URL)
@@ -32,7 +31,7 @@ async def authenticate(request):
     
     Excludes /api/status and /api/keys routes from authentication.
     """
-    if request.path == '/api/status' or request.path.startswith('/api/keys') or request.path.startswith('/api/docs'):
+    if request.path == '/api/status' or request.path.startswith('/api/keys') or request.path.startswith('/swagger'):
         return
     api_key = request.headers.get('X-API-Key')
     if not api_key:

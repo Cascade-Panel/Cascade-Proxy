@@ -4,16 +4,16 @@ from sqlalchemy.orm import Session
 from models.proxy import Proxy
 from services.nginx_service import NginxService
 from services.certbot_service import CertbotService
-from sanic_openapi import openapi
+from sanic_ext import openapi
 
 proxy_blueprint = Blueprint('proxy_blueprint', url_prefix='/api/proxies')
 
 @proxy_blueprint.post('/')
 @openapi.summary("Create a new proxy")
 @openapi.description("Create a new proxy configuration")
-@openapi.parameter("X-API-Key", str, location="header", required=True)
+@openapi.parameter("X-API-Key", str, "header", required=True)
 @openapi.body({"old_ip": str, "old_port": int, "new_domain": str, "https_enabled": bool})
-@openapi.response(201, {"message": str, "proxy": dict}, "Proxy created successfully")
+@openapi.response(201, {"message": str, "proxy": Proxy.to_dict()}, "Proxy created successfully")
 @openapi.response(400, {"error": str}, "Bad request")
 async def create_proxy(request):
     """
@@ -49,8 +49,8 @@ async def create_proxy(request):
 @proxy_blueprint.get('/')
 @openapi.summary("Get all proxies")
 @openapi.description("Retrieve all proxy configurations")
-@openapi.parameter("X-API-Key", str, location="header", required=True)
-@openapi.response(200, [dict], "List of all proxies")
+@openapi.parameter("X-API-Key", str, "header", required=True)
+@openapi.response(200, [Proxy.to_dict()], "List of all proxies")
 async def get_all_proxies(request):
     """
     Retrieve all proxy configurations.
@@ -65,9 +65,9 @@ async def get_all_proxies(request):
 @proxy_blueprint.get('/<proxy_id:int>')
 @openapi.summary("Get a specific proxy")
 @openapi.description("Retrieve a specific proxy configuration by ID")
-@openapi.parameter("X-API-Key", str, location="header", required=True)
-@openapi.parameter("proxy_id", int, location="path", required=True)
-@openapi.response(200, dict, "Proxy details")
+@openapi.parameter("X-API-Key", str, "header", required=True)
+@openapi.parameter("proxy_id", int, "path", required=True)
+@openapi.response(200, Proxy.to_dict(), "Proxy details")
 @openapi.response(404, {"error": str}, "Proxy not found")
 async def get_proxy(request, proxy_id):
     """
@@ -85,10 +85,10 @@ async def get_proxy(request, proxy_id):
 @proxy_blueprint.put('/<proxy_id:int>')
 @openapi.summary("Update a proxy")
 @openapi.description("Update an existing proxy configuration")
-@openapi.parameter("X-API-Key", str, location="header", required=True)
-@openapi.parameter("proxy_id", int, location="path", required=True)
+@openapi.parameter("X-API-Key", str, "header", required=True)
+@openapi.parameter("proxy_id", int, "path", required=True)
 @openapi.body({"old_ip": str, "old_port": int, "new_domain": str, "https_enabled": bool})
-@openapi.response(200, {"message": str, "proxy": dict}, "Proxy updated successfully")
+@openapi.response(200, {"message": str, "proxy": Proxy.to_dict()}, "Proxy updated successfully")
 @openapi.response(404, {"error": str}, "Proxy not found")
 @openapi.response(400, {"error": str}, "Bad request")
 async def update_proxy(request, proxy_id):
@@ -129,8 +129,8 @@ async def update_proxy(request, proxy_id):
 @proxy_blueprint.delete('/<proxy_id:int>')
 @openapi.summary("Delete a proxy")
 @openapi.description("Delete an existing proxy configuration")
-@openapi.parameter("X-API-Key", str, location="header", required=True)
-@openapi.parameter("proxy_id", int, location="path", required=True)
+@openapi.parameter("X-API-Key", str, "header", required=True)
+@openapi.parameter("proxy_id", int, "path", required=True)
 @openapi.response(200, {"message": str}, "Proxy deleted successfully")
 @openapi.response(404, {"error": str}, "Proxy not found")
 @openapi.response(400, {"error": str}, "Bad request")

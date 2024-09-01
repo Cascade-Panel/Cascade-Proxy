@@ -2,7 +2,7 @@ from sanic import Blueprint
 from sanic.response import json
 from sqlalchemy.orm import Session
 from models.api_key import ApiKey
-from sanic_openapi import openapi
+from sanic_ext import openapi
 import secrets
 
 api_key_blueprint = Blueprint('api_key_blueprint', url_prefix='/api/keys')
@@ -11,7 +11,7 @@ api_key_blueprint = Blueprint('api_key_blueprint', url_prefix='/api/keys')
 @openapi.summary("Create a new API key")
 @openapi.description("Create a new API key")
 @openapi.body({"description": str})
-@openapi.response(201, {"message": str, "api_key": dict}, "API key created successfully")
+@openapi.response(201, {"message": str, "api_key": ApiKey.to_dict()}, "API key created successfully")
 @openapi.response(400, {"error": str}, "Bad request")
 async def create_api_key(request):
     """
@@ -34,7 +34,7 @@ async def create_api_key(request):
 @api_key_blueprint.get('/')
 @openapi.summary("Get all API keys")
 @openapi.description("Retrieve all API keys")
-@openapi.response(200, [dict], "List of all API keys")
+@openapi.response(200, [ApiKey.to_dict()], "List of all API keys")
 async def get_all_api_keys(request):
     """
     Retrieve all API keys.
@@ -49,7 +49,7 @@ async def get_all_api_keys(request):
 @api_key_blueprint.delete('/<key_id:int>')
 @openapi.summary("Delete an API key")
 @openapi.description("Delete an existing API key")
-@openapi.parameter("key_id", int, location="path", required=True)
+@openapi.parameter("key_id", int, "path", required=True)
 @openapi.response(200, {"message": str}, "API key deleted successfully")
 @openapi.response(404, {"error": str}, "API key not found")
 @openapi.response(400, {"error": str}, "Bad request")
